@@ -39,9 +39,15 @@ export function ImageEditor({ imageId, onVersionSelect }: ImageEditorProps) {
   // Load version crop data when version changes
   useEffect(() => {
     if (selectedVersion) {
+      // Mark as loading to prevent both debounce and preset useEffect from triggering
+      useCropState.getState().setLoadingFromVersion(true);
       setCrop(selectedVersion.cropData);
       useCropState.getState().setScale(selectedVersion.scale);
       useCropState.getState().setPan(selectedVersion.pan);
+      // Use setTimeout to ensure the flag stays true during preset sync
+      setTimeout(() => {
+        useCropState.getState().setLoadingFromVersion(false);
+      }, 50);
     }
   }, [selectedVersionId]);
 
@@ -100,30 +106,105 @@ export function ImageEditor({ imageId, onVersionSelect }: ImageEditorProps) {
 
       let newCrop = { ...crop };
 
-      switch (resizeHandle) {
-        case 'nw':
-          newCrop.x = Math.max(0, crop.x + (dx / imageWidth) * 100);
-          newCrop.y = Math.max(0, crop.y + (dy / imageHeight) * 100);
-          newCrop.width = Math.max(1, crop.width - (dx / imageWidth) * 100);
-          newCrop.height = Math.max(1, crop.height - (dy / imageHeight) * 100);
-          break;
-        case 'ne':
-          newCrop.y = Math.max(0, crop.y + (dy / imageHeight) * 100);
-          newCrop.width = Math.max(1, crop.width + (dx / imageWidth) * 100);
-          newCrop.height = Math.max(1, crop.height - (dy / imageHeight) * 100);
-          break;
-        case 'sw':
-          newCrop.x = Math.max(0, crop.x + (dx / imageWidth) * 100);
-          // newCrop.y = Math.max(0, crop.y + (dy / imageHeight) * 100);
-          newCrop.width = Math.max(1, crop.width - (dx / imageWidth) * 100);
-          newCrop.height = Math.max(1, crop.height + (dy / imageHeight) * 100);
-          break;
-        case 'se':
-          // newCrop.x = Math.max(0, crop.x + (dx / imageWidth) * 100);
-          // newCrop.y = Math.max(0, crop.y + (dy / imageHeight) * 100);
-          newCrop.width = Math.max(1, crop.width + (dx / imageWidth) * 100);
-          newCrop.height = Math.max(1, crop.height + (dy / imageHeight) * 100);
-          break;
+      const aspectRatio = selectedVersion?.aspectRatio;
+
+      if (aspectRatio) {
+        // Maintain aspect ratio while resizing
+        const targetRatio = aspectRatio.width / aspectRatio.height;
+        const imageRatio = imageWidth / imageHeight;
+
+        const deltaXPercent = (dx / imageWidth) * 100;
+        const deltaYPercent = (dy / imageHeight) * 100;
+
+        // Convert height change to equivalent width change
+        // crop.height = crop.width * imageRatio / targetRatio
+        const deltaYAsWidthChange = deltaYPercent * targetRatio / imageRatio;
+
+        let widthChange: number;
+
+        switch (resizeHandle) {
+          case 'se':
+            // Right-bottom: right drag enlarges width, down drag enlarges height
+            widthChange = (deltaXPercent + deltaYAsWidthChange) / 2;
+            newCrop.width = Math.max(1, crop.width + widthChange);
+            break;
+          case 'sw':
+            // Left-bottom: left drag enlarges width, down drag enlarges height
+            widthChange = (-deltaXPercent + deltaYAsWidthChange) / 2;
+            newCrop.width = Math.max(1, crop.width + widthChange);
+            newCrop.x = Math.max(0, crop.x - widthChange);
+            break;
+          case 'ne':
+            // Right-top: right drag enlarges width, up drag enlarges height
+            widthChange = (deltaXPercent - deltaYAsWidthChange) / 2;
+            newCrop.width = Math.max(1, crop.width + widthChange);
+            break;
+          case 'nw':
+            // Left-top: left drag enlarges width, up drag enlarges height
+            widthChange = (-deltaXPercent - deltaYAsWidthChange) / 2;
+            newCrop.width = Math.max(1, crop.width + widthChange);
+            newCrop.x = Math.max(0, crop.x - widthChange);
+            break;
+        }
+
+        // Calculate height based on aspect ratio
+        newCrop.height = newCrop.width * imageRatio / targetRatio;
+
+        // Adjust y position for ne and nw handles (top handles)
+        if (resizeHandle === 'ne' || resizeHandle === 'nw') {
+          const heightChange = newCrop.height - crop.height;
+          newCrop.y = Math.max(0, crop.y - heightChange);
+        }
+
+        // Boundary constraints
+        if (newCrop.x + newCrop.width > 100) {
+          newCrop.width = 100 - newCrop.x;
+          newCrop.height = newCrop.width * imageRatio / targetRatio;
+          if (resizeHandle === 'ne' || resizeHandle === 'nw') {
+            newCrop.y = crop.y + crop.height - newCrop.height;
+          }
+        }
+        if (newCrop.y + newCrop.height > 100) {
+          newCrop.y = 100 - newCrop.height;
+          newCrop.width = newCrop.height * targetRatio / imageRatio;
+          if (resizeHandle === 'sw' || resizeHandle === 'nw') {
+            newCrop.x = crop.x + crop.width - newCrop.width;
+          }
+        }
+        if (newCrop.x < 0) {
+          newCrop.width = crop.x + crop.width;
+          newCrop.x = 0;
+          newCrop.height = newCrop.width * imageRatio / targetRatio;
+        }
+        if (newCrop.y < 0) {
+          newCrop.height = crop.y + crop.height;
+          newCrop.y = 0;
+          newCrop.width = newCrop.height * targetRatio / imageRatio;
+        }
+      } else {
+        // Freeform - allow independent width/height adjustment
+        switch (resizeHandle) {
+          case 'nw':
+            newCrop.x = Math.max(0, crop.x + (dx / imageWidth) * 100);
+            newCrop.y = Math.max(0, crop.y + (dy / imageHeight) * 100);
+            newCrop.width = Math.max(1, crop.width - (dx / imageWidth) * 100);
+            newCrop.height = Math.max(1, crop.height - (dy / imageHeight) * 100);
+            break;
+          case 'ne':
+            newCrop.y = Math.max(0, crop.y + (dy / imageHeight) * 100);
+            newCrop.width = Math.max(1, crop.width + (dx / imageWidth) * 100);
+            newCrop.height = Math.max(1, crop.height - (dy / imageHeight) * 100);
+            break;
+          case 'sw':
+            newCrop.x = Math.max(0, crop.x + (dx / imageWidth) * 100);
+            newCrop.width = Math.max(1, crop.width - (dx / imageWidth) * 100);
+            newCrop.height = Math.max(1, crop.height + (dy / imageHeight) * 100);
+            break;
+          case 'se':
+            newCrop.width = Math.max(1, crop.width + (dx / imageWidth) * 100);
+            newCrop.height = Math.max(1, crop.height + (dy / imageHeight) * 100);
+            break;
+        }
       }
 
       setCrop(newCrop);
@@ -132,6 +213,11 @@ export function ImageEditor({ imageId, onVersionSelect }: ImageEditorProps) {
   };
 
   const handleMouseUp = () => {
+    // Sync crop state to version when user finishes adjusting the crop box
+    if ((isDragging || isResizing) && imageId && selectedVersionId) {
+      useImageVersions.getState().syncWithCropState(imageId, selectedVersionId);
+    }
+
     setIsDragging(false);
     setIsResizing(false);
     setResizeHandle(null);

@@ -19,6 +19,11 @@ export function CropControls({ selectedPreset, onPresetSelect }: CropControlsPro
 
   // Sync crop changes to backend with debounce
   useEffect(() => {
+    // Skip sync if this is a programmatic load from version data
+    if (useCropState.getState().isLoadingFromVersion) {
+      return;
+    }
+
     if (debounceTimer) clearTimeout(debounceTimer);
 
     const timer = setTimeout(async () => {
@@ -33,7 +38,7 @@ export function CropControls({ selectedPreset, onPresetSelect }: CropControlsPro
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [crop, scale, pan, selectedVersionId]);
+  }, [crop, scale, pan]);
 
   const handleCropChange = (field: keyof typeof crop, value: number) => {
     setCrop({ ...crop, [field]: value });
@@ -47,6 +52,11 @@ export function CropControls({ selectedPreset, onPresetSelect }: CropControlsPro
   };
 
   useEffect(() => {
+    // Skip if this is a version switch - the crop should be loaded from version data, not reset
+    if (useCropState.getState().isLoadingFromVersion) {
+      return;
+    }
+
     const selectedImage = getSelectedImage();
     if (selectedImage && selectedPreset) {
       resetCrop(selectedImage.dimensions, selectedPreset.aspectRatio);

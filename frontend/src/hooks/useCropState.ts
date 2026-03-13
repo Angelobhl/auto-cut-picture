@@ -5,9 +5,11 @@ interface CropState {
   crop: CropData;
   scale: number;
   pan: Pan;
+  isLoadingFromVersion: boolean;
   setCrop: (crop: CropData) => void;
   setScale: (scale: number) => void;
   setPan: (pan: Pan) => void;
+  setLoadingFromVersion: (loading: boolean) => void;
   resetCrop: (dimensions: ImageDimensions, aspectRatio?: { width: number; height: number } | null) => void;
   updateCropFromPixels: (
     pixels: { x: number; y: number; width: number; height: number },
@@ -19,10 +21,12 @@ export const useCropState = create<CropState>((set) => ({
   crop: { x: 0, y: 0, width: 100, height: 100 },
   scale: 1,
   pan: { x: 0, y: 0 },
+  isLoadingFromVersion: false,
 
   setCrop: (crop) => set({ crop }),
   setScale: (scale) => set({ scale }),
   setPan: (pan) => set({ pan }),
+  setLoadingFromVersion: (loading) => set({ isLoadingFromVersion: loading }),
 
   resetCrop: (dimensions, aspectRatio) => {
     if (aspectRatio) {

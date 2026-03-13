@@ -73,6 +73,7 @@ class AnalysisResult(BaseModel):
     versionId: str
     name: str
     cropData: CropData
+    aspectRatio: Optional[AspectRatio] = None
 
 
 class AnalyzeResponse(BaseModel):

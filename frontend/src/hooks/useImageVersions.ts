@@ -123,7 +123,7 @@ export const useImageVersions = create<ImageVersionsState>((set, get) => ({
         await apiClient.createVersion(imageId, {
           name: result.name,
           cropData: result.cropData,
-          aspectRatio: null,
+          aspectRatio: result.aspectRatio,
         });
       }
 

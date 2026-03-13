@@ -37,6 +37,13 @@ class Settings(BaseSettings):
     def thumbnails_path(self) -> str:
         return os.path.join(self.STORAGE_PATH, self.THUMBNAILS_DIR)
 
+    # Qwen Debug Configuration (调试配置)
+    # 开启后可跳过 API 调用，使用本地 JSON 文件
+    QWEN_DEBUG_MODE: bool = False
+    QWEN_MOCK_RESPONSE_FILE: str = ""
+    QWEN_SAVE_RESPONSE: bool = True
+    QWEN_RESPONSE_DIR: str = "./debug_responses"
+
     class Config:
         env_file = ".env"
         case_sensitive = True

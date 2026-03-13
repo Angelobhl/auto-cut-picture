@@ -6,6 +6,8 @@ import logging
 import base64
 import json
 import re
+import os
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +61,7 @@ class CompositionAPI:
 
             # Use qwen3-vl-plus for analysis
             results = await self._analyze_with_qwen(
-                image_data, img_width, img_height, aspect_ratios
+                image_data, img_width, img_height, aspect_ratios, image_id
             )
 
             return AnalyzeResponse(
@@ -79,12 +81,19 @@ class CompositionAPI:
         image_data: bytes,
         img_width: int,
         img_height: int,
-        aspect_ratios: List[AspectRatio]
+        aspect_ratios: List[AspectRatio],
+        image_id: str = "unknown"
     ) -> List[AnalysisResult]:
         """
         Analyze using qwen3-vl-plus (阿里云百炼).
         API: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
         """
+        # 调试模式：使用本地 JSON 文件
+        if settings.QWEN_DEBUG_MODE and settings.QWEN_MOCK_RESPONSE_FILE:
+            return await self._load_mock_response(
+                img_width, img_height, aspect_ratios
+            )
+
         try:
             # Convert image to base64
             image_b64 = base64.b64encode(image_data).decode('utf-8')
@@ -179,6 +188,9 @@ class CompositionAPI:
             data = response.json()
             logger.info(f"qwen3-vl-plus response: {json.dumps(data, ensure_ascii=False)[:500]}...")
 
+            # 保存 API 响应到文件
+            await self._save_response_to_file(image_id, data)
+
             # Parse response
             content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
 
@@ -237,7 +249,8 @@ class CompositionAPI:
                     AnalysisResult(
                         versionId=version_id,
                         name=name,
-                        cropData=CropData(x=x, y=y, width=width, height=height)
+                        cropData=CropData(x=x, y=y, width=width, height=height),
+                        aspectRatio=ar
                     )
                 )
 
@@ -310,7 +323,8 @@ class CompositionAPI:
                 AnalysisResult(
                     versionId=version_id,
                     name=name,
-                    cropData=CropData(**crop_data)
+                    cropData=CropData(**crop_data),
+                    aspectRatio=ar
                 )
             )
         return results
@@ -384,7 +398,8 @@ class CompositionAPI:
                 AnalysisResult(
                     versionId=version_id,
                     name=f"{ar.width}:{ar.height}",
-                    cropData=CropData(**crop_data)
+                    cropData=CropData(**crop_data),
+                    aspectRatio=ar
                 )
             )
 
@@ -392,6 +407,106 @@ class CompositionAPI:
             imageId=image_id,
             results=results
         )
+
+    async def _save_response_to_file(self, image_id: str, response_data: dict):
+        """保存 API 响应到 JSON 文件"""
+        if not settings.QWEN_SAVE_RESPONSE:
+            return
+
+        try:
+            os.makedirs(settings.QWEN_RESPONSE_DIR, exist_ok=True)
+            filename = f"{image_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            filepath = os.path.join(settings.QWEN_RESPONSE_DIR, filename)
+
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(response_data, f, ensure_ascii=False, indent=2)
+
+            logger.info(f"Saved Qwen response to: {filepath}")
+        except Exception as e:
+            logger.error(f"Failed to save response to file: {e}")
+
+    async def _load_mock_response(
+        self,
+        img_width: int,
+        img_height: int,
+        aspect_ratios: List[AspectRatio]
+    ) -> List[AnalysisResult]:
+        """从本地文件加载 mock 响应"""
+        try:
+            with open(settings.QWEN_MOCK_RESPONSE_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            logger.info(f"Loaded mock response from: {settings.QWEN_MOCK_RESPONSE_FILE}")
+
+            # Parse response
+            content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+
+            # Extract JSON from response (handle markdown code blocks)
+            json_str = self._extract_json_from_response(content)
+
+            if not json_str:
+                logger.warning(f"Could not extract JSON from mock response: {content}")
+                return self._get_local_crops(img_width, img_height, aspect_ratios)
+
+            try:
+                result = json.loads(json_str)
+                logger.info(f"Parsed mock result: {result}")
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse JSON from mock response: {e}")
+                return self._get_local_crops(img_width, img_height, aspect_ratios)
+
+            # Build results from parsed data
+            results = []
+            crops = result.get("crops", [])
+
+            for idx, ar in enumerate(aspect_ratios):
+                version_id = f"v{idx+1}"
+
+                # Find matching crop from response
+                crop_data = None
+                reason = ""
+
+                for crop in crops:
+                    if self._ratio_matches(crop.get("ratio", ""), ar):
+                        crop_data = crop
+                        reason = crop.get("reason", "")
+                        break
+
+                if crop_data:
+                    # Validate crop data
+                    x = max(0, min(100, float(crop_data.get("x", 0))))
+                    y = max(0, min(100, float(crop_data.get("y", 0))))
+                    width = max(1, min(100, float(crop_data.get("width", 100))))
+                    height = max(1, min(100, float(crop_data.get("height", 100))))
+
+                    name = f"Qwen {ar.width}:{ar.height}"
+                    if reason:
+                        name += f" - {reason[:30]}..."
+                else:
+                    # Fallback if no matching crop found
+                    logger.warning(f"No crop found for ratio {ar.width}:{ar.height}")
+                    local_crop = self._calculate_smart_crop_local(
+                        img_width, img_height, ar.width, ar.height
+                    )
+                    x, y, width, height = local_crop["x"], local_crop["y"], local_crop["width"], local_crop["height"]
+                    name = f"Smart {ar.width}:{ar.height}"
+
+                results.append(
+                    AnalysisResult(
+                        versionId=version_id,
+                        name=name,
+                        cropData=CropData(x=x, y=y, width=width, height=height),
+                        aspectRatio=ar
+                    )
+                )
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Failed to load mock response: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            # 回退到本地算法
+            return self._get_local_crops(img_width, img_height, aspect_ratios)
 
     async def close(self) -> None:
         """Close the HTTP client"""

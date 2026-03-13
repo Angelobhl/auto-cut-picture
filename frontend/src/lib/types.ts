@@ -76,6 +76,7 @@ export interface AnalysisResult {
   versionId: string;
   name: string;
   cropData: CropData;
+  aspectRatio?: AspectRatio | null;
 }
 
 export interface AnalyzeResponse {

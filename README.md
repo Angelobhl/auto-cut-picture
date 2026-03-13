@@ -113,6 +113,12 @@ QWEN_MODEL=qwen3-vl-plus
 
 # 存储路径
 STORAGE_PATH=./storage
+
+# Qwen 调试配置（可选）
+QWEN_DEBUG_MODE=false          # 开启调试模式，跳过 API 调用
+QWEN_MOCK_RESPONSE_FILE=       # Mock 响应文件路径
+QWEN_SAVE_RESPONSE=true        # 是否保存 API 响应到文件
+QWEN_RESPONSE_DIR=./debug_responses  # 响应文件保存目录
 ```
 
 ### 预设宽高比
@@ -159,11 +165,11 @@ STORAGE_PATH=./storage
 
 1. **上传图片**：拖拽或点击上传图片
 2. **选择图片**：从左侧图片列表选择要编辑的图片
-3. **创建版本**：点击 "New Version" 创建新的裁剪版本
+3. **创建版本**：点击「创建新版本」创建新的裁剪版本
 4. **选择预设**：从右侧选择预设宽高比
 5. **调整裁剪框**：拖动裁剪框调整位置和大小
-6. **智能分析**：点击 "Smart Analyze" 使用 AI 推荐构图
-7. **处理导出**：点击 "Process All Versions" 处理，然后下载
+6. **智能分析**：点击「智能分析」使用 AI 推荐构图
+7. **处理导出**：点击「处理所有版本」处理，然后下载
 
 ## 开发
 

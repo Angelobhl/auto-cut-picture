@@ -88,7 +88,7 @@ export function CropControls({ selectedPreset, onPresetSelect }: CropControlsPro
       {/* Crop Coordinates (Percentage) */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Crop Position (%)
+          裁剪位置 (%)
         </label>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -120,11 +120,11 @@ export function CropControls({ selectedPreset, onPresetSelect }: CropControlsPro
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Crop Size (%)
+          裁剪尺寸 (%)
         </label>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Width</label>
+            <label className="block text-xs text-gray-500 mb-1">宽度</label>
             <input
               type="number"
               min="1"
@@ -136,7 +136,7 @@ export function CropControls({ selectedPreset, onPresetSelect }: CropControlsPro
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Height</label>
+            <label className="block text-xs text-gray-500 mb-1">高度</label>
             <input
               type="number"
               min="1"
@@ -153,7 +153,7 @@ export function CropControls({ selectedPreset, onPresetSelect }: CropControlsPro
       {/* Pan Controls */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Pan Offset (%)
+          平移偏移 (%)
         </label>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -190,7 +190,7 @@ export function CropControls({ selectedPreset, onPresetSelect }: CropControlsPro
         disabled={!selectedPreset}
         className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        Apply Preset to Crop
+        应用预设到裁剪框
       </button>
     </div>
   );

@@ -34,7 +34,7 @@ export function VersionList({ imageId, onVersionSelect }: VersionListProps) {
       console.warn('Cannot delete version: no image selected');
       return;
     }
-    if (confirm('Are you sure you want to delete this version?')) {
+    if (confirm('确定要删除此版本吗？')) {
       await deleteVersion(imageId, versionId);
     }
   };
@@ -42,11 +42,11 @@ export function VersionList({ imageId, onVersionSelect }: VersionListProps) {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-gray-900">Versions</h3>
+        <h3 className="text-sm font-semibold text-gray-900">版本</h3>
         <button
           onClick={() => setShowCreateDialog(true)}
           className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-          title="Create new version"
+          title="创建新版本"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -56,7 +56,7 @@ export function VersionList({ imageId, onVersionSelect }: VersionListProps) {
         <div className="mb-4 p-3 bg-gray-50 rounded-md border border-gray-200">
           <input
             type="text"
-            placeholder="Version name (e.g., 1:1 Square)"
+            placeholder="版本名称（如：1:1 正方形）"
             value={newVersionName}
             onChange={(e) => setNewVersionName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreateVersion()}
@@ -68,7 +68,7 @@ export function VersionList({ imageId, onVersionSelect }: VersionListProps) {
               onClick={handleCreateVersion}
               className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm"
             >
-              Create
+              创建
             </button>
             <button
               onClick={() => {
@@ -77,7 +77,7 @@ export function VersionList({ imageId, onVersionSelect }: VersionListProps) {
               }}
               className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-md text-sm"
             >
-              Cancel
+              取消
             </button>
           </div>
         </div>
@@ -85,9 +85,9 @@ export function VersionList({ imageId, onVersionSelect }: VersionListProps) {
 
       <div className="flex-1 overflow-y-auto space-y-2">
         {loading ? (
-          <div className="text-center text-gray-500 text-sm py-4">Loading versions...</div>
+          <div className="text-center text-gray-500 text-sm py-4">加载版本中...</div>
         ) : versions.length === 0 ? (
-          <div className="text-center text-gray-500 text-sm py-4">No versions yet</div>
+          <div className="text-center text-gray-500 text-sm py-4">暂无版本</div>
         ) : (
           versions.map((version) => (
             <div
@@ -124,7 +124,7 @@ export function VersionList({ imageId, onVersionSelect }: VersionListProps) {
                 <button
                   onClick={(e) => handleDeleteVersion(version.id, e)}
                   className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
-                  title="Delete version"
+                  title="删除版本"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

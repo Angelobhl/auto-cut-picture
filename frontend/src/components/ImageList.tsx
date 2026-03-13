@@ -10,21 +10,21 @@ export function ImageList() {
 
   const handleDeleteImage = async (imageId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Are you sure you want to delete this image and all its versions?')) {
+    if (confirm('确定要删除此图片及其所有版本吗？')) {
       await removeImage(imageId);
     }
   };
 
   return (
     <div className="h-full flex flex-col">
-      <h3 className="text-sm font-semibold text-gray-900 mb-4">Images ({images.length})</h3>
+      <h3 className="text-sm font-semibold text-gray-900 mb-4">图片（{images.length}）</h3>
 
       <div className="flex-1 overflow-y-auto space-y-2">
         {loading ? (
-          <div className="text-center text-gray-500 text-sm py-4">Loading images...</div>
+          <div className="text-center text-gray-500 text-sm py-4">加载图片中...</div>
         ) : images.length === 0 ? (
           <div className="text-center text-gray-500 text-sm py-4">
-            No images uploaded yet
+            尚未上传图片
           </div>
         ) : (
           images.map((image) => (
@@ -67,13 +67,13 @@ export function ImageList() {
                     {image.dimensions.width} × {image.dimensions.height}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {image.versions.length} version{image.versions.length !== 1 ? 's' : ''}
+                    {image.versions.length} 个版本
                   </div>
                 </div>
                 <button
                   onClick={(e) => handleDeleteImage(image.id, e)}
                   className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
-                  title="Delete image"
+                  title="删除图片"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

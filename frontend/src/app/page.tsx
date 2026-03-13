@@ -30,7 +30,7 @@ export default function Home() {
       setShowUploadZone(false);
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload images');
+      alert('上传图片失败');
     }
   }, [addImages]);
 
@@ -48,7 +48,7 @@ export default function Home() {
 
     const selectedImage = useImageList.getState().getSelectedImage();
     if (!selectedImage) {
-      alert('Please select an image first');
+      alert('请先选择一张图片');
       return;
     }
 
@@ -60,10 +60,10 @@ export default function Home() {
           { width: 9, height: 16 },
         ],
       });
-      alert('Smart analysis complete! New versions have been created.');
+      alert('智能分析完成！已创建新版本。');
     } catch (error) {
       console.error('Analysis failed:', error);
-      alert('Failed to analyze image');
+      alert('分析图片失败');
     }
   };
 
@@ -79,7 +79,7 @@ export default function Home() {
   };
 
   const handleDeleteAllImages = async () => {
-    if (confirm('Are you sure you want to delete all images and versions? This cannot be undone.')) {
+    if (confirm('确定要删除所有图片和版本吗？此操作无法撤销。')) {
       await deleteAllImages();
       setShowUploadZone(true);
     }
@@ -112,10 +112,10 @@ export default function Home() {
         <div className="max-w-2xl w-full">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Auto Cut Picture
+              自动裁图
             </h1>
             <p className="text-gray-600 text-lg">
-              Crop and compose your images with precision
+              精准裁剪与构图
             </p>
           </div>
 
@@ -133,14 +133,14 @@ export default function Home() {
             <input {...getInputProps()} />
             <Upload className="w-16 h-16 mx-auto text-gray-400 mb-4" />
             {isDragActive ? (
-              <p className="text-lg text-gray-700">Drop your images here...</p>
+              <p className="text-lg text-gray-700">将图片拖放到这里...</p>
             ) : (
               <div>
                 <p className="text-lg text-gray-700 mb-2">
-                  Drag & drop images here, or click to select
+                  拖放图片到此处，或点击选择
                 </p>
                 <p className="text-sm text-gray-500">
-                  Supports PNG, JPG, JPEG, WebP, GIF
+                  支持 PNG、JPG、JPEG、WebP、GIF
                 </p>
               </div>
             )}
@@ -151,7 +151,7 @@ export default function Home() {
               onClick={() => setShowUploadZone(false)}
               className="mt-6 w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
             >
-              Start Editing ({images.length} images)
+              开始编辑（{images.length} 张图片）
             </button>
           )}
         </div>
@@ -165,13 +165,13 @@ export default function Home() {
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-gray-900">Auto Cut Picture</h1>
+            <h1 className="text-xl font-bold text-gray-900">自动裁图</h1>
             <button
               onClick={() => setShowUploadZone(true)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors flex items-center gap-2"
             >
               <Upload className="w-4 h-4" />
-              Upload Images
+              上传图片
             </button>
           </div>
           <div className="flex items-center gap-2">
@@ -180,21 +180,21 @@ export default function Home() {
               className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
             >
               <Trash2 className="w-4 h-4" />
-              Clear All
+              清空全部
             </button>
             <button
               onClick={handleAnalyze}
               className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-sm font-medium transition-colors flex items-center gap-2"
             >
               <Sparkles className="w-4 h-4" />
-              Smart Analyze
+              智能分析
             </button>
             <button
               onClick={handleBatchProcess}
               className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
             >
               <RefreshCw className="w-4 h-4" />
-              Refresh
+              刷新
             </button>
           </div>
         </div>

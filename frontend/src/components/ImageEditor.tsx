@@ -53,12 +53,12 @@ export function ImageEditor({ imageId, onVersionSelect }: ImageEditorProps) {
 
   // Find preset based on version name
   const presets: Preset[] = [
-    { id: "square", name: "Square (1:1)", aspectRatio: { width: 1, height: 1 }, category: "social" },
-    { id: "landscape-4-3", name: "Landscape (4:3)", aspectRatio: { width: 4, height: 3 }, category: "standard" },
-    { id: "widescreen-16-9", name: "Widescreen (16:9)", aspectRatio: { width: 16, height: 9 }, category: "video" },
-    { id: "portrait-9-16", name: "Portrait (9:16)", aspectRatio: { width: 9, height: 16 }, category: "social" },
-    { id: "instagram-feed", name: "Instagram Feed (4:5)", aspectRatio: { width: 4, height: 5 }, category: "social" },
-    { id: "freeform", name: "Freeform", aspectRatio: null, category: "custom" }
+    { id: "square", name: "正方形 (1:1)", aspectRatio: { width: 1, height: 1 }, category: "social" },
+    { id: "landscape-4-3", name: "横版 (4:3)", aspectRatio: { width: 4, height: 3 }, category: "standard" },
+    { id: "widescreen-16-9", name: "宽屏 (16:9)", aspectRatio: { width: 16, height: 9 }, category: "video" },
+    { id: "portrait-9-16", name: "竖版 (9:16)", aspectRatio: { width: 9, height: 16 }, category: "social" },
+    { id: "instagram-feed", name: "Instagram 动态 (4:5)", aspectRatio: { width: 4, height: 5 }, category: "social" },
+    { id: "freeform", name: "自由比例", aspectRatio: null, category: "custom" }
   ];
   const matchingPreset = presets.find((p) => p.name === selectedVersion?.name);
   useEffect(() => {
@@ -227,8 +227,8 @@ export function ImageEditor({ imageId, onVersionSelect }: ImageEditorProps) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
         <div className="text-center text-gray-500">
-          <p className="text-lg font-medium mb-2">No image selected</p>
-          <p className="text-sm">Select an image from the sidebar to start editing</p>
+          <p className="text-lg font-medium mb-2">未选择图片</p>
+          <p className="text-sm">从侧边栏选择图片开始编辑</p>
         </div>
       </div>
     );
@@ -239,12 +239,12 @@ export function ImageEditor({ imageId, onVersionSelect }: ImageEditorProps) {
       {/* Dimensions Display */}
       <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
         <div>
-          Original: {selectedImage?.dimensions?.width || 'No image selected'} × {selectedImage?.dimensions?.height || 'No image selected'}px
+          原图：{selectedImage?.dimensions?.width || '未选择图片'} × {selectedImage?.dimensions?.height || '未选择图片'}px
         </div>
         <div>
-          Crop: {selectedImage && crop.width
+          裁剪：{selectedImage && crop.width
             ? `${Math.round((crop.width / 100) * (selectedImage.dimensions.width || 0))} × ${Math.round((crop.height / 100) * (selectedImage.dimensions.height || 0))}px`
-            : 'No image selected'}
+            : '未选择图片'}
         </div>
       </div>
 
@@ -310,10 +310,10 @@ export function ImageEditor({ imageId, onVersionSelect }: ImageEditorProps) {
           {/* Info Overlay */}
           <div className="absolute bottom-4 left-4 right-4 flex justify-between" style={{display: (isDragging || isResizing) ? 'none' : ''}}>
             <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-1.5 rounded text-sm">
-              {selectedImage?.filename || 'No image selected'}
+              {selectedImage?.filename || '未选择图片'}
             </div>
             <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-1.5 rounded text-sm">
-              {selectedVersion?.name || 'No version selected'}
+              {selectedVersion?.name || '未选择版本'}
             </div>
           </div>
         </div>

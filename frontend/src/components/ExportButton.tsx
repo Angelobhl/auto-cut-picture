@@ -33,7 +33,7 @@ export function ExportButton({ onBatchProcess }: ExportButtonProps) {
       onBatchProcess?.();
     } catch (error) {
       console.error('Batch process failed:', error);
-      alert('Failed to process images');
+      alert('处理图片失败');
     } finally {
       setProcessing(false);
     }
@@ -64,7 +64,7 @@ export function ExportButton({ onBatchProcess }: ExportButtonProps) {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Batch download failed:', error);
-      alert('Failed to download images');
+      alert('下载图片失败');
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export function ExportButton({ onBatchProcess }: ExportButtonProps) {
         className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
       >
         <Sparkles className="w-5 h-5" />
-        {processing ? 'Processing...' : 'Process All Versions'}
+        {processing ? '处理中...' : '处理所有版本'}
       </button>
 
       <button
@@ -93,11 +93,11 @@ export function ExportButton({ onBatchProcess }: ExportButtonProps) {
         className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
       >
         <Download className="w-5 h-5" />
-        {loading ? 'Downloading...' : 'Download All'}
+        {loading ? '下载中...' : '下载全部'}
       </button>
 
       <div className="text-center text-sm text-gray-600">
-        {processedVersions} / {totalVersions} versions processed
+        {processedVersions} / {totalVersions} 个版本已处理
       </div>
     </div>
   );

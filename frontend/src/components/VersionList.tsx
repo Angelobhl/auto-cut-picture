@@ -23,7 +23,7 @@ export function VersionList({ imageId, onVersionSelect }: VersionListProps) {
     }
     if (!newVersionName.trim()) return;
 
-    await createVersion(imageId, { name: newVersionName });
+    await createVersion(imageId, { name: newVersionName, cropData: null, aspectRatio: null });
     setNewVersionName('');
     setShowCreateDialog(false);
   };

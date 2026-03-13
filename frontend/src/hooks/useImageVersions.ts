@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ImageVersion, VersionCreateRequest, AnalyzeRequest } from '../lib/types';
+import { ImageVersion, VersionCreateRequest, AnalyzeRequest, AspectRatio } from '../lib/types';
 import { apiClient } from '../lib/api';
 import { useCropState } from './useCropState';
 
@@ -12,7 +12,8 @@ interface ImageVersionsState {
   setSelectedVersionId: (id: string | null) => void;
   loadVersions: (imageId: string) => Promise<void>;
   createVersion: (imageId: string, request: VersionCreateRequest) => Promise<void>;
-  updateCrop: (imageId: string, versionId: string, cropData: any, scale?: number, pan?: any) => Promise<void>;
+  updateCrop: (imageId: string, versionId: string, cropData: any, scale?: number, pan?: any, aspectRatio?: AspectRatio | null) => Promise<void>;
+  updateVersionAspectRatio: (versionId: string, aspectRatio: AspectRatio | null) => void;
   deleteVersion: (imageId: string, versionId: string) => Promise<void>;
   analyzeImage: (imageId: string, request: AnalyzeRequest) => Promise<void>;
   syncWithCropState: (imageId: string, versionId: string) => Promise<void>;
@@ -66,12 +67,13 @@ export const useImageVersions = create<ImageVersionsState>((set, get) => ({
     }
   },
 
-  updateCrop: async (imageId, versionId, cropData, scale = 1, pan = { x: 0, y: 0 }) => {
+  updateCrop: async (imageId, versionId, cropData, scale = 1, pan = { x: 0, y: 0 }, aspectRatio) => {
     try {
       const updatedVersion = await apiClient.updateCrop(imageId, versionId, {
         cropData,
         scale,
         pan,
+        aspectRatio,
       });
       set((state) => ({
         versions: state.versions.map((v) =>
@@ -81,6 +83,14 @@ export const useImageVersions = create<ImageVersionsState>((set, get) => ({
     } catch (error) {
       set({ error: 'Failed to update crop' });
     }
+  },
+
+  updateVersionAspectRatio: (versionId, aspectRatio) => {
+    set((state) => ({
+      versions: state.versions.map((v) =>
+        v.id === versionId ? { ...v, aspectRatio } : v
+      ),
+    }));
   },
 
   deleteVersion: async (imageId, versionId) => {
@@ -113,7 +123,7 @@ export const useImageVersions = create<ImageVersionsState>((set, get) => ({
         await apiClient.createVersion(imageId, {
           name: result.name,
           cropData: result.cropData,
-          aspectRatio: undefined, // Let it be calculated
+          aspectRatio: null,
         });
       }
 
@@ -133,13 +143,15 @@ export const useImageVersions = create<ImageVersionsState>((set, get) => ({
 
   syncWithCropState: async (imageId, versionId) => {
     const cropState = useCropState.getState();
+    const currentVersion = get().versions.find(v => v.id === versionId);
     try {
       await get().updateCrop(
         imageId,
         versionId,
         cropState.crop,
         cropState.scale,
-        cropState.pan
+        cropState.pan,
+        currentVersion?.aspectRatio
       );
     } catch (error) {
       set({ error: 'Failed to sync crop state' });

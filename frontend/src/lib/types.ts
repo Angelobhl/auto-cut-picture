@@ -1,8 +1,6 @@
-export interface Preset {
-  id: string;
-  name: string;
-  aspectRatio: { width: number; height: number } | null;
-  category: string;
+export interface AspectRatio {
+  width: number;
+  height: number;
 }
 
 export interface CropData {
@@ -17,21 +15,28 @@ export interface Pan {
   y: number;
 }
 
+export interface ImageDimensions {
+  width: number;
+  height: number;
+}
+
+export interface Preset {
+  id: string;
+  name: string;
+  aspectRatio: AspectRatio | null;
+  category: string;
+}
+
 export interface ImageVersion {
   id: string;
   imageId: string;
   name: string;
-  aspectRatio: { width: number; height: number } | null;
+  aspectRatio: AspectRatio | null;
   cropData: CropData;
   scale: number;
   pan: Pan;
   processed: boolean;
   processedPath: string | null;
-}
-
-export interface ImageDimensions {
-  width: number;
-  height: number;
 }
 
 export interface Image {
@@ -42,20 +47,17 @@ export interface Image {
   versions: ImageVersion[];
 }
 
-export interface UploadResponse {
-  images: Image[];
-}
-
 export interface VersionCreateRequest {
   name: string;
-  cropData?: CropData;
-  aspectRatio?: { width: number; height: number };
+  cropData: CropData | null;
+  aspectRatio: AspectRatio | null;
 }
 
 export interface CropUpdateRequest {
   cropData: CropData;
   scale?: number;
-  pan?: Pan;
+  pan: Pan | null;
+  aspectRatio?: AspectRatio | null;
 }
 
 export interface BatchProcessRequest {
@@ -64,4 +66,19 @@ export interface BatchProcessRequest {
 
 export interface BatchDownloadRequest {
   versionIds: string[];
+}
+
+export interface AnalyzeRequest {
+  aspectRatios: AspectRatio[] | null;
+}
+
+export interface AnalysisResult {
+  versionId: string;
+  name: string;
+  cropData: CropData;
+}
+
+export interface AnalyzeResponse {
+  imageId: string;
+  results: AnalysisResult[];
 }

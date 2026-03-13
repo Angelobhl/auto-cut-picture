@@ -49,7 +49,7 @@ class InMemoryStorage:
                     return version
         return None
 
-    def update_version_crop(self, image_id: str, version_id: str, crop_data: CropData, scale: float = 1.0, pan: Optional[Pan] = None) -> Optional[ImageVersion]:
+    def update_version_crop(self, image_id: str, version_id: str, crop_data: CropData, scale: float = 1.0, pan: Optional[Pan] = None, aspectRatio: Optional[AspectRatio] = None) -> Optional[ImageVersion]:
         """Update crop data for a version"""
         image = self.get_image(image_id)
         if image:
@@ -59,6 +59,7 @@ class InMemoryStorage:
                     version.scale = scale
                     if pan:
                         version.pan = pan
+                    version.aspectRatio = aspectRatio
                     return version
         return None
 

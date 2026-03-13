@@ -8,8 +8,8 @@ interface PresetSelectorProps {
   onPresetSelect: (preset: Preset) => void;
 }
 
-// Presets defined directly in component
-const PRESETS: Preset[] = [
+// Presets defined directly in component - exported for use in other components
+export const PRESETS: Preset[] = [
   { id: "square", name: "Square (1:1)", aspectRatio: { width: 1, height: 1 }, category: "social" },
   { id: "landscape-4-3", name: "Landscape (4:3)", aspectRatio: { width: 4, height: 3 }, category: "standard" },
   { id: "widescreen-16-9", name: "Widescreen (16:9)", aspectRatio: { width: 16, height: 9 }, category: "video" },

@@ -14,7 +14,7 @@ interface CropControlsProps {
 export function CropControls({ selectedPreset, onPresetSelect }: CropControlsProps) {
   const { crop, scale, pan, setCrop, setScale, setPan, resetCrop } = useCropState();
   const { getSelectedImage } = useImageList();
-  const { selectedVersionId, syncWithCropState } = useImageVersions();
+  const { selectedVersionId, syncWithCropState, updateVersionAspectRatio } = useImageVersions();
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Sync crop changes to backend with debounce
@@ -46,11 +46,15 @@ export function CropControls({ selectedPreset, onPresetSelect }: CropControlsPro
     }
   };
 
-  useEffect(() => {                                                                                                                    
-    const selectedImage = getSelectedImage();                                                                                   
-    if (selectedImage && selectedPreset) {                                                                                      
-      resetCrop(selectedImage.dimensions, selectedPreset.aspectRatio);                                                                 
-    }                                                                                                                                  
+  useEffect(() => {
+    const selectedImage = getSelectedImage();
+    if (selectedImage && selectedPreset) {
+      resetCrop(selectedImage.dimensions, selectedPreset.aspectRatio);
+      // Sync aspectRatio to the currently selected version
+      if (selectedVersionId) {
+        updateVersionAspectRatio(selectedVersionId, selectedPreset.aspectRatio);
+      }
+    }
   }, [selectedPreset?.id]);
 
   return (

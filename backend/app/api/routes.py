@@ -175,7 +175,8 @@ async def update_crop(image_id: str, version_id: str, request: CropUpdateRequest
         image_id, version_id,
         request.cropData,
         request.scale,
-        request.pan
+        request.pan,
+        request.aspectRatio
     )
 
     if not version:

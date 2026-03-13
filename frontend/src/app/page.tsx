@@ -8,7 +8,7 @@ import { ImageList } from '../components/ImageList';
 import { VersionList } from '../components/VersionList';
 import { ImageEditor } from '../components/ImageEditor';
 import { CropControls } from '../components/CropControls';
-import { PresetSelector } from '../components/PresetSelector';
+import { PresetSelector, PRESETS } from '../components/PresetSelector';
 import { ExportButton } from '../components/ExportButton';
 import { Upload, X, Sparkles, RefreshCw, Trash2 } from 'lucide-react';
 import { apiClient } from '../lib/api';
@@ -16,6 +16,7 @@ import { Preset } from '../lib/types';
 
 export default function Home() {
   const { addImages, images, selectedImageId, deleteAllImages } = useImageList();
+  const { selectedVersionId, versions } = useImageVersions();
   const [showUploadZone, setShowUploadZone] = useState(true);
   const [selectedPreset, setSelectedPreset] = useState<Preset | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -83,6 +84,27 @@ export default function Home() {
       setShowUploadZone(true);
     }
   };
+
+  // Sync preset selection with selected version
+  useEffect(() => {
+    const selectedVersion = versions.find((v) => v.id === selectedVersionId);
+    if (!selectedVersion) {
+      setSelectedPreset(null);
+      return;
+    }
+
+    // Find matching preset based on aspectRatio
+    const matchingPreset = PRESETS.find((preset) => {
+      if (!preset.aspectRatio && !selectedVersion.aspectRatio) return true;
+      if (!preset.aspectRatio || !selectedVersion.aspectRatio) return false;
+      return (
+        preset.aspectRatio.width === selectedVersion.aspectRatio.width &&
+        preset.aspectRatio.height === selectedVersion.aspectRatio.height
+      );
+    });
+
+    setSelectedPreset(matchingPreset || null);
+  }, [selectedVersionId, versions]);
 
   if (images.length === 0 || showUploadZone) {
     return (

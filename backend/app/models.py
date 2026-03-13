@@ -54,6 +54,7 @@ class CropUpdateRequest(BaseModel):
     cropData: CropData
     scale: Optional[float] = 1.0
     pan: Optional[Pan] = None
+    aspectRatio: Optional[AspectRatio] = None
 
 
 class BatchProcessRequest(BaseModel):

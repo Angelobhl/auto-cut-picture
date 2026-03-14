@@ -353,9 +353,3 @@ async def delete_all_images():
             logger.error(f"Error deleting files for image {image.id}: {e}")
 
     return {"message": f"Deleted {len(all_images)} images"}
-
-
-@router.on_event("shutdown")
-async def shutdown_event():
-    """Cleanup on shutdown"""
-    await composition_api.close()

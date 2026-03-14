@@ -10,10 +10,9 @@ import { cn } from '../lib/utils';
 
 interface ImageEditorProps {
   imageId: string;
-  onVersionSelect?: (version: any) => void;
 }
 
-export function ImageEditor({ imageId, onVersionSelect }: ImageEditorProps) {
+export function ImageEditor({ imageId }: ImageEditorProps) {
   const { selectedVersionId, getSelectedVersion } = useImageVersions();
   const { crop, setCrop, resetCrop } = useCropState();
   const [selectedPreset, setSelectedPreset] = useState<Preset | null>(null);

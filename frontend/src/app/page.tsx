@@ -10,16 +10,25 @@ import { ImageEditor } from '../components/ImageEditor';
 import { CropControls } from '../components/CropControls';
 import { PresetSelector, PRESETS } from '../components/PresetSelector';
 import { ExportButton } from '../components/ExportButton';
-import { Upload, X, Sparkles, RefreshCw, Trash2 } from 'lucide-react';
+import { Upload, Sparkles, RefreshCw, Trash2 } from 'lucide-react';
 import { apiClient } from '../lib/api';
 import { Preset } from '../lib/types';
 
 export default function Home() {
-  const { addImages, images, selectedImageId, deleteAllImages } = useImageList();
+  const { images, selectedImageId, deleteAllImages, loadImages, loading, addImages } = useImageList();
   const { selectedVersionId, versions } = useImageVersions();
-  const [showUploadZone, setShowUploadZone] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [isUploadMode, setIsUploadMode] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<Preset | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Load images on mount
+  useEffect(() => {
+    const init = async () => {
+      await loadImages();
+      setInitialLoading(false);
+    };
+    init();
+  }, [loadImages]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
@@ -27,7 +36,7 @@ export default function Home() {
     try {
       const uploadedImages = await apiClient.uploadImages(acceptedFiles);
       addImages(uploadedImages);
-      setShowUploadZone(false);
+      setIsUploadMode(false);
     } catch (error) {
       console.error('Upload failed:', error);
       alert('上传图片失败');
@@ -67,21 +76,15 @@ export default function Home() {
     }
   };
 
-  const handleVersionSelect = (version: any) => {
-    // Force refresh the crop editor when version changes
-    setRefreshKey((prev) => prev + 1);
-  };
-
   const handleBatchProcess = () => {
     // Refresh image list to show processed versions
     useImageList.getState().loadImages();
-    setRefreshKey((prev) => prev + 1);
   };
 
   const handleDeleteAllImages = async () => {
     if (confirm('确定要删除所有图片和版本吗？此操作无法撤销。')) {
       await deleteAllImages();
-      setShowUploadZone(true);
+      setIsUploadMode(false); // Will show upload zone since images.length === 0
     }
   };
 
@@ -106,7 +109,20 @@ export default function Home() {
     setSelectedPreset(matchingPreset || null);
   }, [selectedVersionId, versions]);
 
-  if (images.length === 0 || showUploadZone) {
+  // Show loading screen during initial load
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">加载中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show upload screen if no images or user clicked upload button
+  if (images.length === 0 || isUploadMode) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-8">
         <div className="max-w-2xl w-full">
@@ -148,10 +164,10 @@ export default function Home() {
 
           {images.length > 0 && (
             <button
-              onClick={() => setShowUploadZone(false)}
+              onClick={() => setIsUploadMode(false)}
               className="mt-6 w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
             >
-              开始编辑（{images.length} 张图片）
+              返回编辑（{images.length} 张图片）
             </button>
           )}
         </div>
@@ -167,7 +183,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold text-gray-900">自动裁图</h1>
             <button
-              onClick={() => setShowUploadZone(true)}
+              onClick={() => setIsUploadMode(true)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors flex items-center gap-2"
             >
               <Upload className="w-4 h-4" />
@@ -212,16 +228,14 @@ export default function Home() {
 
             {/* Version List */}
             <div className="flex-1 overflow-y-auto p-4">
-              <VersionList imageId={selectedImageId} onVersionSelect={handleVersionSelect} />
+              <VersionList imageId={selectedImageId} />
             </div>
           </div>
         </aside>
 
         {/* Center - Image Editor */}
         <section className="flex-1 p-6 overflow-hidden">
-          <div key={refreshKey}>
-            <ImageEditor imageId={selectedImageId} onVersionSelect={handleVersionSelect} />
-          </div>
+          <ImageEditor imageId={selectedImageId} />
         </section>
 
         {/* Right Sidebar - Controls */}

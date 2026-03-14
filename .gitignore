@@ -9,5 +9,4 @@
 *.log
 
 # Debug responses (Qwen API 响应调试文件)
-backend/debug_responses/*.json
-!backend/debug_responses/example_response.json
+backend/debug_responses/

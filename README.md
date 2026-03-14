@@ -24,6 +24,8 @@
 ### 后端
 - **Python 3.13+**
 - **FastAPI** - Web 框架
+- **SQLAlchemy** - ORM 框架
+- **SQLite** - 数据持久化存储
 - **Pillow** - 图片处理
 - **Qwen-VL-Plus** - AI 智能构图分析（阿里云百炼）
 
@@ -44,11 +46,14 @@
 │   ├── app/
 │   │   ├── api/             # API 路由
 │   │   ├── config/          # 配置
+│   │   ├── db/              # 数据库模块
 │   │   ├── models.py        # 数据模型
 │   │   └── services/        # 业务逻辑
+│   ├── scripts/             # 脚本工具
 │   └── requirements.txt
 │
 └── storage/                  # 文件存储
+    ├── data.db              # SQLite 数据库文件
     ├── uploads/             # 原始图片
     ├── processed/           # 处理后的图片
     └── thumbnails/          # 缩略图
@@ -136,6 +141,34 @@ QWEN_RESPONSE_DIR=./debug_responses  # 响应文件保存目录
 | Twitter Header | 3:1 | Twitter 头图 |
 | Facebook Cover | 2.7:1 | Facebook 封面 |
 | Freeform | - | 自由比例 |
+
+## 数据库管理
+
+应用使用 SQLite 数据库进行数据持久化存储，图片和版本数据会自动保存。
+
+### 数据库位置
+
+默认存储在 `storage/data.db`。
+
+### 初始化数据库
+
+首次运行时会自动创建数据库，也可以手动初始化：
+
+```bash
+cd backend
+python -m scripts.init_db
+```
+
+### 重置数据库
+
+删除所有数据并重建表结构：
+
+```bash
+cd backend
+python -m scripts.init_db --reset
+```
+
+> ⚠️ 注意：重置数据库会删除所有图片记录和版本数据（不会删除实际文件）
 
 ## API 接口
 

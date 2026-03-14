@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     UPLOADS_DIR: str = "uploads"
     PROCESSED_DIR: str = "processed"
     THUMBNAILS_DIR: str = "thumbnails"
+    DATABASE_NAME: str = "data.db"
 
     # Server Configuration
     HOST: str = "0.0.0.0"
@@ -36,6 +37,11 @@ class Settings(BaseSettings):
     @property
     def thumbnails_path(self) -> str:
         return os.path.join(self.STORAGE_PATH, self.THUMBNAILS_DIR)
+
+    @property
+    def database_path(self) -> str:
+        """Full path to the SQLite database file."""
+        return os.path.join(self.STORAGE_PATH, self.DATABASE_NAME)
 
     # Qwen Debug Configuration (调试配置)
     # 开启后可跳过 API 调用，使用本地 JSON 文件

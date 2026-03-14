@@ -39,4 +39,4 @@ env/
 .DS_Store
 
 # Storage (optional, uncomment if you don't want to track uploads)
-# storage/
+storage/

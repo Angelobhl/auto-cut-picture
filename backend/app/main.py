@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .api.routes import router
 from .config.settings import settings
+from .db.database import init_db, close_db
+from .services.storage import init_storage
 import os
 import logging
 
@@ -20,6 +22,28 @@ app = FastAPI(
     description="API for image cropping and composition",
     version="1.0.0"
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database and storage on startup."""
+    logger.info("Initializing database...")
+    await init_db(settings.STORAGE_PATH)
+    logger.info(f"Database initialized at: {settings.database_path}")
+
+    # Initialize storage
+    init_storage()
+    logger.info("Storage initialized")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown."""
+    from .services.composition_api import composition_api
+    await composition_api.close()
+    await close_db()
+    logger.info("Application shutdown complete")
+
 
 # Configure CORS
 app.add_middleware(

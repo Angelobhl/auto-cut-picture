@@ -28,12 +28,11 @@ export const useImageVersions = create<ImageVersionsState>((set, get) => ({
   error: null,
 
   setVersions: (imageId, versions) => {
-    set({ versions });
-    // Select first version if none selected
-    const state = get();
-    if (versions.length > 0 && !state.selectedVersionId) {
-      set({ selectedVersionId: versions[0].id });
-    }
+    // Always select first version when setting versions
+    set({
+      versions,
+      selectedVersionId: versions.length > 0 ? versions[0].id : null
+    });
   },
 
   setSelectedVersionId: (id) => set({ selectedVersionId: id }),
@@ -42,12 +41,12 @@ export const useImageVersions = create<ImageVersionsState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const versions = await apiClient.getVersions(imageId);
-      set({ versions, loading: false });
-      // Select first version if none selected
-      const state = get();
-      if (versions.length > 0 && !state.selectedVersionId) {
-        set({ selectedVersionId: versions[0].id });
-      }
+      // Always select first version when loading versions for an image
+      set({
+        versions,
+        loading: false,
+        selectedVersionId: versions.length > 0 ? versions[0].id : null
+      });
     } catch (error) {
       set({ error: 'Failed to load versions', loading: false });
     }
@@ -123,19 +122,17 @@ export const useImageVersions = create<ImageVersionsState>((set, get) => ({
         await apiClient.createVersion(imageId, {
           name: result.name,
           cropData: result.cropData,
-          aspectRatio: result.aspectRatio,
+          aspectRatio: result.aspectRatio ?? null,
         });
       }
 
       // Reload versions
       const versions = await apiClient.getVersions(imageId);
-      set({ versions, loading: false });
-
-      // Select first version if none selected
-      const state = get();
-      if (versions.length > 0 && !state.selectedVersionId) {
-        set({ selectedVersionId: versions[0].id });
-      }
+      set({
+        versions,
+        loading: false,
+        selectedVersionId: versions.length > 0 ? versions[0].id : null
+      });
     } catch (error) {
       set({ error: 'Failed to analyze image', loading: false });
     }

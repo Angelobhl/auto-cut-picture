@@ -8,10 +8,9 @@ import { cn } from '../lib/utils';
 
 interface VersionListProps {
   imageId: string;
-  onVersionSelect?: (version: any) => void;
 }
 
-export function VersionList({ imageId, onVersionSelect }: VersionListProps) {
+export function VersionList({ imageId }: VersionListProps) {
   const { versions, selectedVersionId, setSelectedVersionId, createVersion, deleteVersion, loading } = useImageVersions();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newVersionName, setNewVersionName] = useState('');
@@ -95,7 +94,6 @@ export function VersionList({ imageId, onVersionSelect }: VersionListProps) {
               onClick={() => {
                 if (version.id) {
                   setSelectedVersionId(version.id);
-                  onVersionSelect?.(version);
                 }
               }}
               className={cn(

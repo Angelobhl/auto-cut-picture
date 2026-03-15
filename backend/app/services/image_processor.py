@@ -59,7 +59,8 @@ class ImageProcessor:
             image = image.convert('RGB')
 
         # Save original image with EXIF preserved
-        safe_filename = f"{image_id}{ext}"
+        # Always use .jpg extension since we save as JPEG format
+        safe_filename = f"{image_id}.jpg"
         original_path = os.path.join(self.uploads_path, safe_filename)
 
         # Save with EXIF data (Pillow expects bytes format)
@@ -87,7 +88,8 @@ class ImageProcessor:
         thumb = image.copy()
         thumb.thumbnail(thumbnail_size, Image.Resampling.LANCZOS)
 
-        thumbnail_path = os.path.join(self.thumbnails_path, f"{image_id}_thumb{ext}")
+        # Always use .jpg extension for thumbnails since we save as JPEG format
+        thumbnail_path = os.path.join(self.thumbnails_path, f"{image_id}_thumb.jpg")
 
         # Save thumbnail as JPEG
         if thumb.mode not in ('RGB', 'L'):
@@ -98,10 +100,10 @@ class ImageProcessor:
 
     def get_thumbnail_path(self, image_id: str) -> Optional[str]:
         """Get thumbnail path for an image"""
-        for ext in ['.jpg', '.jpeg', '.png', '.webp']:
-            path = os.path.join(self.thumbnails_path, f"{image_id}_thumb{ext}")
-            if os.path.exists(path):
-                return path
+        # Thumbnails are always saved as .jpg
+        path = os.path.join(self.thumbnails_path, f"{image_id}_thumb.jpg")
+        if os.path.exists(path):
+            return path
         return None
 
     def crop_image(
@@ -195,10 +197,10 @@ class ImageProcessor:
 
     def _find_original_path(self, image_id: str) -> Optional[str]:
         """Find the original image path by image ID"""
-        for ext in ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp']:
-            path = os.path.join(self.uploads_path, f"{image_id}{ext}")
-            if os.path.exists(path):
-                return path
+        # Original images are always saved as .jpg
+        path = os.path.join(self.uploads_path, f"{image_id}.jpg")
+        if os.path.exists(path):
+            return path
         return None
 
     def delete_image(self, image_id: str) -> None:
